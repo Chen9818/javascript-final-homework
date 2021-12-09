@@ -26,7 +26,7 @@ function renderAllProduct(item){
             <h4 class="productType">新品</h4>
             <img
             src="${re.images}"
-            alt=""
+            alt="${re.title}"
             />
             <a href="#" class="addCardBtn" data-id=${re.id}>加入購物車</a>
             <h3>${re.title}</h3>
@@ -58,6 +58,9 @@ function renderAllProduct(item){
     }
 
 //加入購物車功能
+let data1 = {}
+let data = {}
+
 function addCart(){
     let addCardBtn = document.querySelectorAll(".addCardBtn")
     addCardBtn.forEach(function(re){
@@ -67,10 +70,9 @@ function addCart(){
             e.preventDefault()
             // console.log(e.target.getAttribute("data-id"));
             //重構格式
-            let data1 = {}
+
             data1["productId"] = e.target.getAttribute("data-id")
             data1["quantity"] = 1
-            let data = {}
             data["data"] = data1
 
             axios.post(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`,data)
@@ -80,8 +82,21 @@ function addCart(){
                 alert("加入購物車")
             })
             .catch((error)=>console.log(error))
+
+            // console.log(data["data"].quantity);
+            // cartListData.forEach(function(re){
+            //     console.log(re);
+            //     // if(data["data"].productId === re.product.id){
+            //     //     data1["quantity"]+=1
+            //     //     console.log(data);    
+            //     // }else{
+            //     //     console.log("aa");
+            //     // }
+              
+            // })
         }
     })
+
 }
 
 //購物車內商品
