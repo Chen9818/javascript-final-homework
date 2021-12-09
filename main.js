@@ -1,10 +1,11 @@
-let allProductData
-let filterProductData = []
+let allProductData //全部品項
+let allCartProduct //購物車內的品項
+let filterProductData = [] //篩選後品項
 
 
 function init(){
     renderAllProduct(allProductData)
-    addCart()
+    renderAddCart()
 }
 
 //全部商品清單
@@ -16,8 +17,8 @@ axios.get(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/pr
 .catch((error)=>console.log(error))
 
 //渲染全部商品
+const productWrap = document.querySelector(".productWrap")
 function renderAllProduct(item){
-    const productWrap = document.querySelector(".productWrap")
     let productText = ""
     // console.log(item);
     item.forEach(function(re){
@@ -58,92 +59,103 @@ function renderAllProduct(item){
     }
 
 //加入購物車功能
-let data1 = {}
-let data = {}
-
-function addCart(){
-    let addCardBtn = document.querySelectorAll(".addCardBtn")
-    addCardBtn.forEach(function(re){
-        // console.log(re);
-        re.addEventListener("click",addCard)
-        function addCard(e){
-            e.preventDefault()
-            // console.log(e.target.getAttribute("data-id"));
-            //重構格式
-
-            data1["productId"] = e.target.getAttribute("data-id")
-            data1["quantity"] = 1
-            data["data"] = data1
-
-            axios.post(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`,data)
-            .then(function(re){
-                // console.log(re);
-                getCart()
-                alert("加入購物車")
-            })
-            .catch((error)=>console.log(error))
-
-            // console.log(data["data"].quantity);
-            // cartListData.forEach(function(re){
-            //     console.log(re);
-            //     // if(data["data"].productId === re.product.id){
-            //     //     data1["quantity"]+=1
-            //     //     console.log(data);    
-            //     // }else{
-            //     //     console.log("aa");
-            //     // }
-              
-            // })
+productWrap.addEventListener("click",addCartBtn)
+function addCartBtn(e){
+    e.preventDefault()
+    // console.log(e.target.getAttribute("class"));
+    if(e.target.getAttribute("class") !== "addCardBtn"){
+        return
+    }
+    let addCardId = e.target.getAttribute("data-id")
+    // console.log(addCardId);
+    let numCheck = 1 //商品預設數量為1
+    allCartProduct.forEach(function(re){
+        if(re.product.id === addCardId){ //購物車內有某一商品，就累加數量
+            numCheck = re.quantity+=1
         }
     })
+    // console.log(numCheck);
 
+    axios.post(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`,{
+            "data": {
+              "productId": addCardId,
+              "quantity": numCheck
+            }
+          }
+    )
+    .then(function(re){
+        console.log(re);
+        renderAddCart()
+        alert("加入購物車")
+    })
+    .catch((error)=>console.log(error))
 }
-
-//購物車內商品
-let cartListData = []
-function getCart(){
-    axios.get(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`)
-.then(function(re){
-    // console.log(re);
-    cartListData = re.data.carts
-    renderCart(cartListData)
-})
-.catch((error)=>console.log(error))
-}
-
 
 //渲染購物車內商品
-const cartList = document.querySelector(".shoppingCart-table")
-function renderCart(item){
-    // console.log(item);
-    let cartText = ""
-    item.forEach(function(re){
-        console.log(re);
-        cartText +=`<tr>
-        <td>
-          <div class="cardItem-title">
-            <img src="${re.product.images}" alt="" />
-            <p>${re.product.title}</p>
-          </div>
-        </td>
-        <td>NT$${re.product.price}</td>
-        <td>1</td>
-        <td>NT$12,000</td>
-        <td class="discardBtn">
-          <a href="#" class="material-icons">
-            clear
-          </a>
-        </td>
-      </tr>`
+let cartList = document.querySelector(".shoppingCart-tableList")
+function renderAddCart(){
+       // console.log(item);
+       axios.get(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`)
+       .then(function(re){
+           allCartProduct = re.data.carts
+           document.querySelector(".totalPrice").textContent = re.data.finalTotal //總價格
+           let cartText = ""
+        //    console.log(allCartProduct);
+           allCartProduct.forEach(function(re){
+            //    console.log(re);
+               cartText +=`<tr>
+               <td>
+                 <div class="cardItem-title">
+                   <img src="${re.product.images}" alt="" />
+                   <p>${re.product.title}</p>
+                 </div>
+               </td>
+               <td>NT$${re.product.price}</td>
+               <td>${re.quantity}</td>
+               <td>NT$${re.product.price*re.quantity}</td>
+               <td class="discardBtn">
+                 <a href="#" class="material-icons" data-id="${re.id}">
+                   clear
+                 </a>
+               </td>
+             </tr>`
+       
+           })
+           cartList.innerHTML = cartText
 
+        })
+       .catch((error)=>console.log(error))
+       
+}
+
+//刪除購物車單一品項
+cartList.addEventListener("click",deleteBtn)
+function deleteBtn(e){
+    e.preventDefault()
+    // console.log(e.target.getAttribute("data-id"));
+    cartId = e.target.getAttribute("data-id")
+    axios.delete(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts/${cartId}`)
+    .then(function(re){
+        // console.log(re)
+        renderAddCart()
+        alert("刪除成功")
     })
-    cartList.innerHTML = cartText
+    .catch((error)=>console.log(error))
 }
 
 
-// {
-//     "data": {
-//       "productId": "CijPuIkOja6HEdZYMiV2",
-//       "quantity": 5
-//     }
-//   }
+//清空購物車
+const discardAllBtn = document.querySelector(".discardAllBtn")
+discardAllBtn.addEventListener("click",deleteAllBtn)
+function deleteAllBtn(e){
+    e.preventDefault()
+    axios.delete(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`)
+    .then(function(re){
+        // console.log(re)
+        renderAddCart()
+        alert("刪除成功")
+    })
+    .catch(function(error){
+        alert("已清空")
+    })
+}
