@@ -159,3 +159,47 @@ function deleteAllBtn(e){
         alert("已清空")
     })
 }
+
+//預定資料
+const orderInfoBtn = document.querySelector(".orderInfo-btn")
+orderInfoBtn.addEventListener("click",sendInfo)
+function sendInfo(e){
+    e.preventDefault()
+    let customerName = document.querySelector("#customerName").value
+    let customerPhone = document.querySelector("#customerPhone").value
+    let customerEmail = document.querySelector("#customerEmail").value
+    let customerAddress = document.querySelector("#customerAddress").value
+    let customerTradeWay = document.querySelector("#tradeWay").value
+
+    // console.log(customerAddress,customerEmail);
+    if(allCartProduct.length === 0){
+        alert("請加入購物車")
+        return
+    }
+    if(customerName == "" || customerPhone == "" || customerEmail == "" || customerAddress == "" || customerTradeWay == ""){
+        alert("請填入完整資料")
+        return
+    }
+    axios.post(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/orders`,{
+        "data":{
+            "user": {
+                "name": customerName,
+                "tel": customerPhone,
+                "email": customerEmail,
+                "address": customerAddress,
+                "payment": customerTradeWay
+            }
+        }
+    })
+    .then(function(re){
+        alert("訂單建立成功")
+        renderAddCart()
+        document.querySelector("#customerName").value =""
+        document.querySelector("#customerPhone").value =""
+        document.querySelector("#customerEmail").value =""
+        document.querySelector("#customerAddress").value =""
+        document.querySelector("#tradeWay").value ="ATM"
+    })
+    .catch((error)=>console.log(error))
+    
+}
