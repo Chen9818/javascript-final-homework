@@ -31,8 +31,8 @@ function renderAllProduct(item){
             />
             <a href="#" class="addCardBtn" data-id=${re.id}>加入購物車</a>
             <h3>${re.title}</h3>
-            <del class="originPrice">NT$${re.origin_price}</del>
-            <p class="nowPrice">NT$${re.price}</p>
+            <del class="originPrice">NT$${format(re.origin_price)}</del>
+            <p class="nowPrice">NT$${format(re.price)}</p>
         </li>`
     })
     productWrap.innerHTML = productText
@@ -98,7 +98,7 @@ function renderAddCart(){
        axios.get(`https://livejs-api.hexschool.io/api/livejs/v1/customer/${api_path}/carts`)
        .then(function(re){
            allCartProduct = re.data.carts
-           document.querySelector(".totalPrice").textContent = re.data.finalTotal //總價格
+           document.querySelector(".totalPrice").textContent = format(re.data.finalTotal) //總價格
            let cartText = ""
         //    console.log(allCartProduct);
            allCartProduct.forEach(function(re){
@@ -110,9 +110,9 @@ function renderAddCart(){
                    <p>${re.product.title}</p>
                  </div>
                </td>
-               <td>NT$${re.product.price}</td>
+               <td>NT$${format(re.product.price)}</td>
                <td>${re.quantity}</td>
-               <td>NT$${re.product.price*re.quantity}</td>
+               <td>NT$${format(re.product.price*re.quantity)}</td>
                <td class="discardBtn">
                  <a href="#" class="material-icons" data-id="${re.id}">
                    clear
@@ -203,3 +203,4 @@ function sendInfo(e){
     .catch((error)=>console.log(error))
     
 }
+
