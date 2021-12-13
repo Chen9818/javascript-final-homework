@@ -204,3 +204,44 @@ function sendInfo(e){
     
 }
 
+//表單驗證
+const input = document.querySelector("input[name],select[name=交易方式]")
+const form = document.querySelector(".orderInfo-form")
+const constraints = {
+    "姓名":{
+        presence:{
+            message:"必填"
+        }
+    },
+    "電話":{
+        presence:{
+            message:"必填"
+        }
+    },
+    "Email":{
+        presence:{
+            message:"必填"
+        }
+    },
+    "寄送地址":{
+        presence:{
+            message:"必填"
+        }
+    }
+}
+
+input.forEach((item)=>{
+    console.log(item);
+    item.addEventListener("change",function(){
+        item.nextElementSibling.textContent = ""
+        let errors = validate(form,constraints)
+        console.log(errors)
+
+        if(errors){
+            Object.keys(errors).forEach(function(keys){
+                console.log(keys);
+                document.querySelector(`[data-message="${keys}"]`).textContent = errors[keys]
+            })
+        }
+    })
+})
