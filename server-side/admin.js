@@ -20,6 +20,7 @@ userInfo.forEach(function(item){
             total[re.category]+= re.price*re.quantity
         }
     })
+})
     // console.log(total);
 
     //重組C3資料
@@ -53,7 +54,7 @@ userInfo.forEach(function(item){
     },
     
 });
-})
+
 
 }
 
